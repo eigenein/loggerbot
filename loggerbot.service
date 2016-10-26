@@ -1,0 +1,12 @@
+[Unit]
+Description=Simple Telegram bot that logs chat messages
+
+[Service]
+User=eigenein
+Group=eigenein
+WorkingDirectory=/home/eigenein/loggerbot
+ExecStart=/usr/bin/env python3 bot.py --verbose --log-file loggerbot.log
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
