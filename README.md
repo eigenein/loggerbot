@@ -18,8 +18,8 @@ Messages are logged into the `messages` table.
 $ cd
 $ git clone git@github.com:eigenein/loggerbot.git
 $ git clone git@gitlab.com:eigenein/dotfiles.git
+$ sudo systemctl link /home/eigenein/loggerbot/loggerbot.service
 $ cd /etc/systemd/system
-$ sudo ln -s /home/eigenein/loggerbot/loggerbot.service loggerbot.service
 $ sudo ln -s /home/eigenein/dotfiles/loggerbot.service.d loggerbot.service.d
 $ sudo systemctl start loggerbot
 ```
