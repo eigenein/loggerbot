@@ -79,6 +79,7 @@ class Bot(aiotg.Bot):
         message = update.message
         if not message or not message.text:
             return
+        logging.info("Received update #%s.", message.id)
         with self.db:
             self.db.execute("""
                     INSERT INTO messages (timestamp, chat_id, from_user_id, `text`)
