@@ -3,9 +3,11 @@
 
 import asyncio
 import logging
+import socket
 import sqlite3
 import typing
 
+import aiohttp
 import aiotg
 import click
 
@@ -61,34 +63,28 @@ async def async_main(token: str, db: sqlite3.Connection):
     """
     Runs bot on async I/O loop.
     """
-    offset = 0
-    async with aiotg.Telegram(token) as telegram:  # type: aiotg.Telegram
-        while True:
-            updates = await telegram.get_updates(offset, 100, 5)
-            if not updates:
-                continue
-            for update in updates:
-                logging.info("Received update #%s.", update.id)
-                logging.debug("Received update: %s", update)
-                try:
-                    await handle_update(update, db)
-                except Exception as ex:
-                    logging.error("Error while handling update.", exc_info=ex)
-            offset = updates[-1].id + 1
+    connector = aiohttp.TCPConnector(family=socket.AF_INET, verify_ssl=False)
+    await aiotg.LongPollingRunner(aiotg.Telegram(token, connector=connector), Bot(db)).run()
 
 
-async def handle_update(update: aiotg.Update, db: sqlite3.Connection):
+class Bot(aiotg.Bot):
     """
-    Handles single update.
+    Logs every received text message to the database.
     """
-    message = update.message
-    if not message or not message.text:
-        return
-    with db:
-        db.execute("""
-            INSERT INTO messages (timestamp, chat_id, from_user_id, `text`)
-            VALUES (?, ?, ?, ?)
-        """, (int(message.date.timestamp()), message.chat.id, message.from_.id, message.text))
+
+    def __init__(self, db: sqlite3.Connection):
+        self.db = db
+
+    async def on_update(self, telegram: aiotg.Telegram, update: aiotg.Update):
+        message = update.message
+        if not message or not message.text:
+            return
+        with self.db:
+            self.db.execute("""
+                    INSERT INTO messages (timestamp, chat_id, from_user_id, `text`)
+                    VALUES (?, ?, ?, ?)
+                """,
+                (int(message.date.timestamp()), message.chat.id, message.from_.id, message.text))
 
 
 if __name__ == "__main__":
