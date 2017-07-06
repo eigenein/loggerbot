@@ -15,6 +15,7 @@ Messages are logged into the `messages` table.
 ### Docker
 
 ```sh
+mkdir -p /srv/loggerbot
 docker build -t loggerbot .
-docker run -d --restart always -v <DIRECTORY>:/srv/loggerbot --env LOGGER_BOT_TELEGRAM_TOKEN='<TOKEN>' loggerbot
+docker run -d --restart always -v /srv/loggerbot:/srv/loggerbot --env LOGGER_BOT_TELEGRAM_TOKEN='<TOKEN>' loggerbot
 ```
